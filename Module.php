@@ -55,4 +55,3 @@ class Module extends AbstractModule
         $event->setParam('values', $values);
     }
 }
-

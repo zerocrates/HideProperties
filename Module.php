@@ -46,12 +46,16 @@ class Module extends AbstractModule
 
     public function filterDisplayValues(Event $event)
     {
-        $settings = $this->getServiceLocator()->get('Omeka\Settings');
+        $services = $this->getServiceLocator();
+        $status = $services->get('Omeka\Status');
+        if (!$status->isSiteRequest()) {
+            return;
+        }
+
+        $settings = $services->get('Omeka\Settings');
         $hiddenProperties = $settings->get('hidden_properties_properties', []);
         $values = $event->getParams()['values'];
-        foreach ($hiddenProperties as $property) {
-            unset($values[$property]);
-        }
+        $values = array_diff_key($values, array_flip($hiddenProperties));
         $event->setParam('values', $values);
     }
 }

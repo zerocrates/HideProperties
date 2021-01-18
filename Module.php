@@ -39,8 +39,10 @@ class Module extends AbstractModule
 
     public function handleConfigForm(AbstractController $controller)
     {
+        $adminShowAll = (bool) $controller->params()->fromPost('admin_show_all');
         $hiddenProperties = $controller->params()->fromPost('hidden-properties', []);
         $settings = $this->getServiceLocator()->get('Omeka\Settings');
+        $settings->set('hidden_properties_admin_show_all', $adminShowAll);
         $settings->set('hidden_properties_properties', $hiddenProperties);
     }
 
@@ -48,11 +50,11 @@ class Module extends AbstractModule
     {
         $services = $this->getServiceLocator();
         $status = $services->get('Omeka\Status');
-        if (!$status->isSiteRequest()) {
+        $settings = $services->get('Omeka\Settings');
+        if ($status->isAdminRequest() && $settings->get('hidden_properties_admin_show_all')) {
             return;
         }
 
-        $settings = $services->get('Omeka\Settings');
         $hiddenProperties = $settings->get('hidden_properties_properties', []);
         $values = $event->getParams()['values'];
         $values = array_diff_key($values, array_flip($hiddenProperties));

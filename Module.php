@@ -33,8 +33,12 @@ class Module extends AbstractModule
     public function getConfigForm(PhpRenderer $renderer)
     {
         $settings = $this->getServiceLocator()->get('Omeka\Settings');
+        $adminShowAll = $settings->get('hidden_properties_admin_show_all');
         $hiddenProperties = $settings->get('hidden_properties_properties', []);
-        return $renderer->render('hide-properties/config-form', ['hiddenProperties' => $hiddenProperties]);
+        return $renderer->render('hide-properties/config-form', [
+            'adminShowAll' => $adminShowAll,
+            'hiddenProperties' => $hiddenProperties,
+        ]);
     }
 
     public function handleConfigForm(AbstractController $controller)

@@ -33,25 +33,35 @@ class Module extends AbstractModule
     public function getConfigForm(PhpRenderer $renderer)
     {
         $settings = $this->getServiceLocator()->get('Omeka\Settings');
+        $adminShowAll = $settings->get('hidden_properties_admin_show_all');
         $hiddenProperties = $settings->get('hidden_properties_properties', []);
-        return $renderer->render('hide-properties/config-form', ['hiddenProperties' => $hiddenProperties]);
+        return $renderer->render('hide-properties/config-form', [
+            'adminShowAll' => $adminShowAll,
+            'hiddenProperties' => $hiddenProperties,
+        ]);
     }
 
     public function handleConfigForm(AbstractController $controller)
     {
+        $adminShowAll = (bool) $controller->params()->fromPost('admin_show_all');
         $hiddenProperties = $controller->params()->fromPost('hidden-properties', []);
         $settings = $this->getServiceLocator()->get('Omeka\Settings');
+        $settings->set('hidden_properties_admin_show_all', $adminShowAll);
         $settings->set('hidden_properties_properties', $hiddenProperties);
     }
 
     public function filterDisplayValues(Event $event)
     {
-        $settings = $this->getServiceLocator()->get('Omeka\Settings');
+        $services = $this->getServiceLocator();
+        $status = $services->get('Omeka\Status');
+        $settings = $services->get('Omeka\Settings');
+        if ($status->isAdminRequest() && $settings->get('hidden_properties_admin_show_all')) {
+            return;
+        }
+
         $hiddenProperties = $settings->get('hidden_properties_properties', []);
         $values = $event->getParams()['values'];
-        foreach ($hiddenProperties as $property) {
-            unset($values[$property]);
-        }
+        $values = array_diff_key($values, array_flip($hiddenProperties));
         $event->setParam('values', $values);
     }
 }

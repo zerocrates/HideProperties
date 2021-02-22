@@ -7,7 +7,8 @@
         <label for="admin_show_all"><?= $this->translate('Show all properties on admin') ?></label>
     </div>
     <div class="inputs">
-        <input type="checkbox" name="admin_show_all" id="admin_show_all" value="<?= (int) $this->adminShowAll ?>">
+        <input type="hidden" name="admin_show_all" value="0">
+        <input type="checkbox" name="admin_show_all" id="admin_show_all" value="1"<?= $this->adminShowAll ? ' checked' : '' ?>>
     </div>
 </div>
 <div id="hide-properties-list" data-hidden-properties="<?php echo $this->escapeHtml(json_encode($this->hiddenProperties)); ?>">
